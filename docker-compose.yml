@@ -6,21 +6,23 @@ services:
       dockerfile: keylime_py.Dockerfile
     image: keylime_py
     hostname: 'keylime-verifier'
-    user: root
     volumes:
       - secure-volume:/var/lib/keylime
     ports:
         - "8892:8892"
-    command: [
-      "/usr/local/bin/keylime_verifier"
-    ]
+    command:
+      - /bin/bash
+      - -c
+      - |
+        /usr/local/bin/keylime_verifier || \
+        sleep 100000
+
   keylime-registrar:
     build:
       context: ./docker/fedora/
       dockerfile: keylime_py.Dockerfile
     image: keylime_py
     hostname: 'keylime-verifier' # this is a bit of poor workaround, will fix in python code
-    user: root
     volumes:
       - secure-volume:/var/lib/keylime
     ports:
@@ -33,12 +35,13 @@ services:
       dockerfile: keylime_rust.Dockerfile
     image: keylime_rust
     hostname: 'keylime-agent'
-    user: root
-    volumes:
-      - ./target/debug/:/rust-keylime
+    #volumes:
+      #- ./target/debug/:/rust-keylime
     network_mode: host
     environment:
     - TCTI=tabrmd:bus_type=system
+    volumes:
+      - secure-volume:/var/lib/keylime
     command:
       - /bin/bash
       - -c
@@ -64,7 +67,11 @@ services:
             --tcti=swtpm: \
             --allow-root \
             --flush-all &
-        RUST_LOG=keylime_agent=trace /rust-keylime/keylime_agent
+        cd /rust-keylime && \
+        /root/keylime_install2.sh && \
+        /root/wait.sh /var/lib/keylime/cv_ca/client-cert.crt /bin/true && \
+        RUST_LOG=keylime_agent=trace cargo run --bin keylime_agent || \
+        sleep 9999999999
 volumes:
   secure-volume:
 

@@ -17,5 +17,5 @@ do
   sleep 2
 done
 
->&2 echo "Verifier certificate available - executing registrar"
+>&2 echo "Verifier certificate available - executing application"
 exec $cmd

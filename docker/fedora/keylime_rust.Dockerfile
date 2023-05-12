@@ -12,6 +12,7 @@ LABEL version="2.0.1" description="Keylime - Bootstrapping and Maintaining Trust
 ARG BRANCH=master
 ENV KEYLIME_HOME ${HOME}/keylime
 ENV container docker
+COPY wait.sh keylime_install.sh keylime_install2.sh /root/
 COPY dbus-policy.conf /etc/dbus-1/system.d/
 
 # Install dev tools and libraries (includes openssl-devel)
@@ -35,6 +36,7 @@ glib2-static \
 gnulib \
 kmod \
 llvm llvm-devel \
+libarchive-devel \
 libselinux-python3 \
 libtool \
 libtpms \
@@ -56,9 +58,15 @@ RUN dnf makecache && \
   dnf -y install $PKGS_DEPS && \
   dnf clean all && \
   rm -rf /var/cache/dnf/*
+  
+WORKDIR ${HOME}
+RUN git clone https://github.com/keylime/keylime.git
 
-# Move keylime.conf to expected location in /etc/
 WORKDIR ${KEYLIME_HOME}
-RUN git clone https://github.com/keylime/keylime.git && \
-cd keylime && \
-cp keylime.conf /etc/keylime.conf
+RUN /root/keylime_install.sh
+RUN /root/keylime_install2.sh
+
+WORKDIR /
+RUN git clone https://github.com/keylime/rust-keylime.git && \
+  cd rust-keylime && \
+  cargo build

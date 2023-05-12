@@ -11,13 +11,10 @@ LABEL version="2.0.1" description="Keylime - Python Devel Env"
 # environment variables
 ARG BRANCH=master
 ENV container docker
-ENV HOME /root
 ENV KEYLIME_HOME ${HOME}/keylime
 ENV TPM_HOME ${HOME}/swtpm2
+COPY wait.sh keylime_install.sh /root/
 COPY dbus-policy.conf /etc/dbus-1/system.d/
-COPY wait.sh /root/
-RUN ["chmod", "+x", "/root/wait.sh"]
-
 
 # Install dev tools and libraries (includes openssl-devel)
 RUN dnf groupinstall -y \
@@ -74,14 +71,16 @@ RUN dnf install -y \
     which
 
 WORKDIR ${HOME}
-RUN git clone https://github.com/keylime/keylime.git && \
-cd keylime && \
-sed -e 's/127.0.0.1/0.0.0.0/g' keylime-agent.conf > tmp_keylime-agent.conf && \
-mv tmp_keylime-agent.conf keylime-agent.conf && \
-python3 ${KEYLIME_HOME}/setup.py install && \
-pip3 install -r $KEYLIME_HOME/requirements.txt && \
-${KEYLIME_HOME}/services/installer.sh
+RUN git clone https://github.com/keylime/keylime.git
 
+WORKDIR ${KEYLIME_HOME}
+RUN pip3 install -r $KEYLIME_HOME/requirements.txt && \
+  python3 ${KEYLIME_HOME}/setup.py install
+
+RUN cp keylime.conf /etc/keylime.conf && \
+  /root/keylime_install.sh && \
+  ${KEYLIME_HOME}/services/installer.sh
+  
 RUN dnf makecache && \
   dnf clean all && \
   rm -rf /var/cache/dnf/*
