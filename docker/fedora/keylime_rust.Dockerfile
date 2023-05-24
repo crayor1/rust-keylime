@@ -42,6 +42,7 @@ libtool \
 libtpms \
 make \
 openssl-devel \
+openssl \
 redhat-rpm-config \
 rust clippy cargo \
 pkg-config \

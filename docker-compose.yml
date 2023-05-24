@@ -5,6 +5,10 @@ services:
       context: ./docker/fedora/
       dockerfile: keylime_py.Dockerfile
     image: keylime_py
+    #environment:
+      #KEYLIME_VERIFIER_ENABLE_AGENT_MTLS: false
+      #KEYLIME_TENANT_ENABLE_AGENT_MTLS: false
+      #KEYLIME_AGENT_ENABLE_INSECURE_PAYLOAD: true
     hostname: 'keylime-verifier'
     volumes:
       - secure-volume:/var/lib/keylime
@@ -41,8 +45,11 @@ services:
     image: keylime_rust
     hostname: 'keylime-agent'
     network_mode: host
+    #environment:
+      #KEYLIME_AGENT_ENABLE_AGENT_MTLS: false
+      #KEYLIME_AGENT_ENABLE_INSECURE_PAYLOAD: true
     environment:
-    - TCTI=tabrmd:bus_type=system
+      TCTI: tabrmd:bus_type=system
     volumes:
       - secure-volume:/var/lib/keylime
     ports:
@@ -74,6 +81,8 @@ services:
             --allow-root \
             --flush-all &
         cd /rust-keylime && \
+        tpm2_getekcertificate -o ECcert.bin && \
+        openssl x509 -inform der -in ECcert.bin >/var/lib/keylime/tpm_cert_store/swtpm.pem && \
         /root/keylime_install2.sh && \
         /root/wait.sh /var/lib/keylime/cv_ca/client-cert.crt /bin/true && \
         sleep 2 && \
