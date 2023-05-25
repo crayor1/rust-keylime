@@ -13,7 +13,7 @@ ARG BRANCH=master
 ENV container docker
 ENV KEYLIME_HOME ${HOME}/keylime
 ENV TPM_HOME ${HOME}/swtpm2
-COPY wait.sh keylime_install.sh /root/
+COPY wait.sh keylime_install.sh keylime_install2.sh /root/
 COPY dbus-policy.conf /etc/dbus-1/system.d/
 
 # Install dev tools and libraries (includes openssl-devel)
@@ -79,6 +79,7 @@ RUN pip3 install -r $KEYLIME_HOME/requirements.txt && \
 
 RUN cp keylime.conf /etc/keylime.conf && \
   /root/keylime_install.sh && \
+  /root/keylime_install2.sh && \
   ${KEYLIME_HOME}/services/installer.sh
   
 RUN dnf makecache && \

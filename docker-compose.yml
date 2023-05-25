@@ -11,7 +11,8 @@ services:
       #KEYLIME_AGENT_ENABLE_INSECURE_PAYLOAD: true
     hostname: 'keylime-verifier'
     volumes:
-      - secure-volume:/var/lib/keylime
+      - keylime-volume:/var/lib/keylime
+      - swtpm-volume:/var/lib/swtpm-localca
     network_mode: host
     ports:
         - "8892:8892" # verifier revocation port
@@ -30,7 +31,8 @@ services:
     image: keylime_py
     hostname: 'keylime-registrar'
     volumes:
-      - secure-volume:/var/lib/keylime
+      - keylime-volume:/var/lib/keylime
+      - swtpm-volume:/var/lib/swtpm-localca
     network_mode: host
     ports:
         - "8891:8891" # registrar TLS listen port
@@ -51,7 +53,8 @@ services:
     environment:
       TCTI: tabrmd:bus_type=system
     volumes:
-      - secure-volume:/var/lib/keylime
+      - keylime-volume:/var/lib/keylime
+      - swtpm-volume:/var/lib/swtpm-localca
     ports:
         - "9002:9002" # agent listen port
         - "8992:8992" # extra port, not present in vagrant example
@@ -81,13 +84,13 @@ services:
             --allow-root \
             --flush-all &
         cd /rust-keylime && \
-        tpm2_getekcertificate -o ECcert.bin && \
-        openssl x509 -inform der -in ECcert.bin >/var/lib/keylime/tpm_cert_store/swtpm.pem && \
-        /root/keylime_install2.sh && \
         /root/wait.sh /var/lib/keylime/cv_ca/client-cert.crt /bin/true && \
         sleep 2 && \
+        /root/keylime_install2.sh && \
+        tpm2_getekcertificate -o ECcert.bin && \
+        openssl x509 -inform der -in ECcert.bin -out /var/lib/keylime/tpm_cert_store/swtpm.pem && \
         RUST_LOG=keylime_agent=trace cargo run --bin keylime_agent || \
         sleep 9999999999
 volumes:
-  secure-volume:
-
+  keylime-volume:
+  swtpm-volume:

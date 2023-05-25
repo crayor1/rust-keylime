@@ -11,7 +11,7 @@ fi
 echo "Creating keylime user if it not exists"
 if ! getent passwd keylime >/dev/null; then
     adduser --system --shell /bin/false \
-            --home /var/lib/keylime --no-create-home \
+            --home /var/lib/keylime --no-create-home --uid 999 -o \
             keylime
 fi
 
@@ -20,11 +20,13 @@ echo "Changing files to be owned by the keylime user"
 mkdir -p /var/lib/keylime
 mkdir -p /var/log/keylime
 mkdir -p /var/run/keylime
+mkdir -p /var/lib/swtpm-localca
 
 chown keylime:keylime -R /etc/keylime
 chown keylime:keylime -R /var/lib/keylime
 chown keylime:keylime -R /var/log/keylime
 chown keylime:keylime -R /var/run/keylime
+chown keylime:keylime -R /var/lib/swtpm-localca
 
 chmod 700 /var/run/keylime
 
