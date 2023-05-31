@@ -1,0 +1,9 @@
+keylime_tenant -v 127.0.0.1 -t 127.0.0.1 -tp 9002 --cert /var/lib/keylime/cv_ca --uuid d432fbb3-d2f1-4a97-9ef7-75bd81c00000 --tpm_policy '{"15":"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"}' -c add
+
+keylime_tenant -v 127.0.0.1 -t 127.0.0.1 -tp 9002 --cert /var/lib/keylime/cv_ca --uuid d432fbb3-d2f1-4a97-9ef7-75bd81c00000 --tpm_policy '{"15":"9d43db597018484d954cf7115881526f7517d6fbbb664c190711d41d4908ad9a"}' -c update
+
+keylime_tenant -v 127.0.0.1 -t 127.0.0.1 -tp 9002 --cert /var/lib/keylime/cv_ca --uuid d432fbb3-d2f1-4a97-9ef7-75bd81c00000 --tpm_policy '{"22":"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff","15"["0000000000000000000000000000000000000000","0000000000000000000000000000000000000000000000000000000000000000","000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000","44f12027ab81dfb6e096018f5a9f19645f988d45529cded3427159dc0032d921"]}' -c update
+tpm2_pcrextend 15:sha256=b5bb9d8014a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b878ae4944c
+sudo tpm2_pcrread sha1:15
+
+keylime_tenant -v 127.0.0.1 -t 127.0.0.1 -tp 9002 --cert /var/lib/keylime/cv_ca --uuid d432fbb3-d2f1-4a97-9ef7-75bd81c00000 --tpm_policy '{"15":"0000000000000000000000000000000000000000000000000000000000000000"}' -c update
